@@ -1,12 +1,12 @@
-// Importamos o Layout e os componentes da Home
+// Importamos os componentes
 import Layout from "./components/layout/Layout";
 import HeroBanner from "./components/home/HeroBanner";
+import ProductCarousel from "./components/home/ProductCarousel";
 import PromoBanner from "./components/home/PromoBanner";
 
-function App() {
-    // Dados dos slides do HeroBanner
-    // Poderíamos deixar o HeroBanner usar os slides padrão,
-    // mas passando via props temos mais controle
+// O App agora recebe products como prop (vem do main.jsx)
+function App({ products = [] }) {
+    // Dados dos slides do banner
     const heroSlides = [
         {
             image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&h=900&fit=crop",
@@ -29,28 +29,18 @@ function App() {
     ];
 
     return (
-        // Layout envolve todo o conteúdo usando CHILDREN
-        // Tudo entre <Layout> e </Layout> vira o children
         <Layout>
-            {/* HeroBanner - Carrossel principal */}
+            {/* Banner principal */}
             <HeroBanner slides={heroSlides} />
 
-            {/* Seção de produtos virá aqui na próxima etapa */}
-            <section className="section">
-                <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">Novidades</h2>
-                        <p className="section-subtitle">
-                            As últimas peças que acabaram de chegar
-                        </p>
-                    </div>
-                    <p style={{ textAlign: "center", color: "#666" }}>
-                        Os produtos serão carregados na próxima etapa...
-                    </p>
-                </div>
-            </section>
+            {/* Carrossel de Novidades - todos os produtos */}
+            <ProductCarousel
+                products={products}
+                title="Novidades"
+                subtitle="As últimas peças que acabaram de chegar"
+            />
 
-            {/* PromoBanner - Banner promocional */}
+            {/* Banner promocional */}
             <PromoBanner
                 image="https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&h=600&fit=crop"
                 title="Outlet com até 50% OFF"
@@ -58,20 +48,12 @@ function App() {
                 buttonText="Ver Ofertas"
             />
 
-            {/* Outra seção de produtos virá aqui */}
-            <section className="section">
-                <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">Mais Vendidos</h2>
-                        <p className="section-subtitle">
-                            Os queridinhos das nossas clientes
-                        </p>
-                    </div>
-                    <p style={{ textAlign: "center", color: "#666" }}>
-                        Os produtos serão carregados na próxima etapa...
-                    </p>
-                </div>
-            </section>
+            {/* Carrossel de Mais Vendidos - primeiros 8 produtos */}
+            <ProductCarousel
+                products={products.slice(0, 8)}
+                title="Mais Vendidos"
+                subtitle="Os queridinhos das nossas clientes"
+            />
         </Layout>
     );
 }
