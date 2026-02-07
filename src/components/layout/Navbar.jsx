@@ -1,53 +1,32 @@
-// Importamos os hooks do React
 import { useState, useEffect } from "react";
+import { useCart } from "../../context/CartContext";
 
-// Componente Navbar
-// Responsável pela barra de navegação do site
 export default function Navbar() {
-    // ========== ESTADO ==========
-    // useState retorna um array com 2 elementos:
-    // 1. menuOpen = o valor atual do estado (true ou false)
-    // 2. setMenuOpen = função para atualizar o estado
-    // useState(false) = o menu começa FECHADO
+    // Estado do menu mobile
     const [menuOpen, setMenuOpen] = useState(false);
 
-    // ========== FUNÇÕES ==========
-    // Função para alternar o menu (abrir/fechar)
-    const toggleMenu = () => {
-        // Se menuOpen é true, vira false
-        // Se menuOpen é false, vira true
-        setMenuOpen(!menuOpen);
-    };
+    // Pega dados do carrinho via Context
+    const { cartCount, toggleCart } = useCart();
 
-    // Função para fechar o menu
-    // Usada quando clica em um link ou no overlay
-    const closeMenu = () => {
-        setMenuOpen(false);
-    };
+    const toggleMenu = () => setMenuOpen(!menuOpen);
+    const closeMenu = () => setMenuOpen(false);
 
-    // ========== EFEITO ==========
-    // useEffect executa código quando menuOpen muda
+    // Bloqueia scroll quando menu está aberto
     useEffect(() => {
-        // Quando o menu abre, bloqueamos o scroll da página
         if (menuOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "";
         }
-
-        // Cleanup: quando o componente sair da tela,
-        // garantimos que o scroll volta ao normal
         return () => {
             document.body.style.overflow = "";
         };
-    }, [menuOpen]); // Array de dependências: executa quando menuOpen mudar
+    }, [menuOpen]);
 
-    // ========== RENDERIZAÇÃO ==========
     return (
         <nav className="navbar-elegance">
             <div className="navbar-container">
-                {/* Botão do Menu Mobile (hamburguer) */}
-                {/* A classe "open" é adicionada quando menuOpen é true */}
+                {/* Botão do Menu Mobile */}
                 <button
                     className={`navbar-menu-toggle ${menuOpen ? "open" : ""}`}
                     onClick={toggleMenu}
@@ -64,7 +43,6 @@ export default function Navbar() {
                 </a>
 
                 {/* Menu de Navegação */}
-                {/* A classe "open" é adicionada quando menuOpen é true */}
                 <div
                     className={`navbar-menu-wrapper ${menuOpen ? "open" : ""}`}
                 >
@@ -102,21 +80,26 @@ export default function Navbar() {
                     </ul>
                 </div>
 
-                {/* Overlay - fundo escuro quando menu está aberto */}
-                {/* Só aparece quando menuOpen é true */}
-                {/* Ao clicar, fecha o menu */}
+                {/* Overlay Mobile */}
                 {menuOpen && (
                     <div className="navbar-overlay" onClick={closeMenu}></div>
                 )}
 
-                {/* Ícones do lado direito */}
+                {/* Ícones */}
                 <div className="navbar-icons">
+                    {/* Botão do Carrinho - agora funcional! */}
                     <button
                         className="navbar-icon-btn cart-btn"
+                        onClick={toggleCart}
                         aria-label="Sacola"
                     >
                         <i className="bx bx-shopping-bag"></i>
+                        {/* Badge com quantidade (só aparece se tiver itens) */}
+                        {cartCount > 0 && (
+                            <span className="cart-badge">{cartCount}</span>
+                        )}
                     </button>
+
                     <button
                         className="navbar-icon-btn"
                         aria-label="Minha conta"

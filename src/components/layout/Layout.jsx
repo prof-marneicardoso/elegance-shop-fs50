@@ -1,25 +1,31 @@
-// Importamos os componentes que fazem parte do Layout
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import CartDrawer from "../cart/CartDrawer";
+import Toast from "../../ui/Toast";
+import { useCart } from "../../context/CartContext";
 
 // Componente Layout
-// Recebe "children" como prop - tudo que estiver entre <Layout> e </Layout>
-// Esse padrão é chamado de COMPOSIÇÃO
+// Estrutura base de todas as páginas
+// Inclui Navbar, Footer, CartDrawer e Toast
 export default function Layout({ children }) {
+    // Pega o toast do contexto para exibir mensagens
+    const { toast } = useCart();
+
     return (
         <div className="layout-elegance">
-            {/* Navbar sempre aparece no topo */}
             <Navbar />
 
-            {/* 
-                O children é o conteúdo específico de cada página
-                Pode ser a Home, a página de Produtos, o Carrinho, etc.
-                O Layout não precisa saber o que é - só renderiza!
-            */}
             <main className="main-elegance">{children}</main>
 
-            {/* Footer sempre aparece no rodapé */}
             <Footer />
+
+            {/* Carrinho lateral */}
+            <CartDrawer />
+
+            {/* Toast de feedback */}
+            {toast.message && (
+                <Toast message={toast.message} type={toast.type} />
+            )}
         </div>
     );
 }

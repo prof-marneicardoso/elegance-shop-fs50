@@ -1,57 +1,39 @@
 import { useEffect, useState } from "react";
+import { useCart } from "../../context/CartContext";
 import { formatCurrency } from "../../utils/format";
 
-// Componente ProductModal
-// Exibe detalhes de um produto em uma janela modal
-// Props:
-//   - product: objeto com dados do produto (ou null)
-//   - isOpen: boolean indicando se o modal está aberto
-//   - onClose: função para fechar o modal
 export default function ProductModal({ product, isOpen, onClose }) {
-    // ========== ESTADOS LOCAIS ==========
-    // Tamanho selecionado pelo usuário
-    const [selectedSize, setSelectedSize] = useState("");
+    // Agora usa o hook do carrinho!
+    const { addToCart } = useCart();
 
-    // Cor selecionada pelo usuário
+    // Estados locais
+    const [selectedSize, setSelectedSize] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
 
-    // ========== EFEITO: BLOQUEAR SCROLL ==========
-    // Quando o modal abre, bloqueamos o scroll da página
+    // Bloqueia scroll
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "";
         }
-
-        // Cleanup: garante que o scroll volta ao normal
         return () => {
             document.body.style.overflow = "";
         };
     }, [isOpen]);
 
-    // ========== EFEITO: FECHAR COM ESC ==========
-    // Permite fechar o modal pressionando a tecla Escape
+    // Fecha com ESC
     useEffect(() => {
-        const handleEsc = (event) => {
-            if (event.key === "Escape") {
-                onClose();
-            }
+        const handleEsc = (e) => {
+            if (e.key === "Escape") onClose();
         };
-
-        // Só adiciona o listener se o modal estiver aberto
         if (isOpen) {
             window.addEventListener("keydown", handleEsc);
         }
-
-        // Cleanup: remove o listener
-        return () => {
-            window.removeEventListener("keydown", handleEsc);
-        };
+        return () => window.removeEventListener("keydown", handleEsc);
     }, [isOpen, onClose]);
 
-    // ========== EFEITO: RESETAR SELEÇÕES ==========
-    // Quando o produto muda, limpa as seleções anteriores
+    // Reseta seleções quando produto muda
     useEffect(() => {
         if (product) {
             setSelectedSize("");
@@ -59,48 +41,35 @@ export default function ProductModal({ product, isOpen, onClose }) {
         }
     }, [product]);
 
-    // ========== RENDERIZAÇÃO CONDICIONAL ==========
-    // Se não tem produto, não renderiza nada
     if (!product) return null;
 
-    // ========== PROCESSAMENTO DOS DADOS ==========
-    // Os tamanhos e cores vêm como string separada por vírgula
-    // Convertemos para array para poder usar map()
+    // Processa tamanhos e cores
     const sizes = product.sizes
         ? product.sizes.split(",").map((s) => s.trim())
         : [];
-
     const colors = product.colors
         ? product.colors.split(",").map((c) => c.trim())
         : [];
 
-    // ========== FUNÇÃO: ADICIONAR AO CARRINHO ==========
+    // Adiciona ao carrinho e fecha o modal
     const handleAddToCart = () => {
-        // Por enquanto, só exibe no console
-        // Na próxima etapa, vamos integrar com o carrinho real
-        console.log("Adicionar ao carrinho:", {
+        addToCart({
             ...product,
             selectedSize,
             selectedColor,
         });
-
-        // Fecha o modal após adicionar
         onClose();
     };
 
-    // ========== RENDERIZAÇÃO ==========
     return (
-        // Overlay - fundo escuro que fecha o modal ao clicar
         <div
             className={`modal-overlay ${isOpen ? "open" : ""}`}
             onClick={onClose}
         >
-            {/* Container do modal - stopPropagation impede que clique feche */}
             <div
                 className="modal-container"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Botão de fechar (X) */}
                 <button
                     className="modal-close"
                     onClick={onClose}
@@ -109,11 +78,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
                     <i className="bx bx-x"></i>
                 </button>
 
-                {/* Imagem do produto */}
                 <div className="modal-image">
                     <img src={product.image} alt={product.name} />
-
-                    {/* Tags */}
                     <div className="product-tags">
                         {product.isNew && (
                             <span className="tag tag-new">Novo</span>
@@ -126,15 +92,10 @@ export default function ProductModal({ product, isOpen, onClose }) {
                     </div>
                 </div>
 
-                {/* Conteúdo/informações do produto */}
                 <div className="modal-content">
-                    {/* Categoria */}
                     <span className="modal-tag">{product.tag}</span>
-
-                    {/* Nome */}
                     <h2 className="modal-title">{product.name}</h2>
 
-                    {/* Preços */}
                     <div className="modal-price">
                         {product.oldPrice && (
                             <span className="price-old">
@@ -146,13 +107,11 @@ export default function ProductModal({ product, isOpen, onClose }) {
                         </span>
                     </div>
 
-                    {/* Descrição */}
                     <p className="modal-description">
                         {product.description ||
-                            "Produto de alta qualidade, perfeito para diversas ocasiões. Confeccionado com materiais selecionados para garantir conforto e durabilidade."}
+                            "Produto de alta qualidade, perfeito para diversas ocasiões."}
                     </p>
 
-                    {/* Seleção de tamanho (só aparece se tiver tamanhos) */}
                     {sizes.length > 0 && (
                         <div className="modal-options">
                             <h4>Tamanho</h4>
@@ -174,7 +133,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
                         </div>
                     )}
 
-                    {/* Seleção de cor (só aparece se tiver cores) */}
                     {colors.length > 0 && (
                         <div className="modal-options">
                             <h4>Cor</h4>
@@ -197,7 +155,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
                         </div>
                     )}
 
-                    {/* Botões de ação */}
                     <div className="modal-actions">
                         <button
                             className="btn btn-primary"
