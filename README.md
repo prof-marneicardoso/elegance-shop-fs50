@@ -8,139 +8,169 @@ Um projeto prático e progressivo para aprender React do zero ao deploy, constru
 
 ---
 
-## ETAPA 2 - Navbar (useState + useEffect + Eventos)
+## ETAPA 3 - Footer (Componente Visual)
 🎯 Objetivos desta etapa
 
-  - Entender o que é estado (state) no React
-  - Aprender a usar o hook useState
-  - Aprender a usar o hook useEffect
-  - Trabalhar com eventos (onClick)
-  - Criar um menu mobile funcional
+  - Criar um componente visual completo
+  - Praticar a estruturação de JSX
+  - Entender a organização de um componente maior
+  - Usar ícones do BoxIcons
 
 ---
 
-### O que é Estado (State)?
+## Criando o Footer
 
-Imagine um interruptor de luz. Ele tem dois estados: ligado ou desligado. Quando você aperta o interruptor, o estado muda e a luz responde.
-
-No React, estado é exatamente isso: um dado que pode mudar ao longo do tempo. Quando o estado muda, o React automaticamente atualiza a tela para refletir a mudança.
-
-### Exemplos de estado em uma loja virtual:
-
-  - Menu mobile está aberto ou fechado?
-  - Quantos itens tem no carrinho?
-  - Qual slide do banner está ativo?
-  - O usuário está logado ou não?
-
-## Criando a Navbar
-
-### Criar a branch da Etapa 2
+### Criar a branch da Etapa 3
 
 ```
-git switch -c etapa-2-navbar-useState-useEffect
+git switch -c etapa-3-footer
 ```
 
-### Passo 1: Criar o arquivo Navbar.jsx
+### Passo 1: Criar o arquivo Footer.jsx
 
-Crie o arquivo src/components/layout/Navbar.jsx:
+Crie o arquivo src/components/layout/Footer.jsx:
 
 ```jsx
-// Importamos os hooks do React
-import { useState, useEffect } from "react";
+// Componente Footer
+// Um componente visual que exibe informações da loja
+// Não precisa de estado porque apenas exibe conteúdo estático
 
-// Componente Navbar
-// Responsável pela barra de navegação do site
-export default function Navbar() {
-    // ========== ESTADO ==========
-    // useState retorna um array com 2 elementos:
-    // 1. menuOpen = o valor atual do estado (true ou false)
-    // 2. setMenuOpen = função para atualizar o estado
-    // useState(false) = o menu começa FECHADO
-    const [menuOpen, setMenuOpen] = useState(false);
-
-    // ========== FUNÇÕES ==========
-    // Função para alternar o menu (abrir/fechar)
-    const toggleMenu = () => {
-        // Se menuOpen é true, vira false
-        // Se menuOpen é false, vira true
-        setMenuOpen(!menuOpen);
-    };
-
-    // Função para fechar o menu
-    // Usada quando clica em um link ou no overlay
-    const closeMenu = () => {
-        setMenuOpen(false);
-    };
-
-    // ========== EFEITO ==========
-    // useEffect executa código quando menuOpen muda
-    useEffect(() => {
-        // Quando o menu abre, bloqueamos o scroll da página
-        if (menuOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-
-        // Cleanup: quando o componente sair da tela,
-        // garantimos que o scroll volta ao normal
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [menuOpen]); // Array de dependências: executa quando menuOpen mudar
-
-    // ========== RENDERIZAÇÃO ==========
+export default function Footer() {
     return (
-        <nav className="navbar-elegance">
-            <div className="navbar-container">
-                {/* Botão do Menu Mobile (hamburguer) */}
-                {/* A classe "open" é adicionada quando menuOpen é true */}
-                <button
-                    className={`navbar-menu-toggle ${menuOpen ? "open" : ""}`}
-                    onClick={toggleMenu}
-                    aria-label="Menu"
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-
-                {/* Logo */}
-                <a href="/" className="navbar-logo">
-                    ELEGANCE
-                </a>
-
-                {/* Menu de Navegação */}
-                {/* A classe "open" é adicionada quando menuOpen é true */}
-                <div className={`navbar-menu-wrapper ${menuOpen ? "open" : ""}`}>
-                    <ul className="navbar-menu">
-                        <li><a href="/" onClick={closeMenu}>Início</a></li>
-                        <li><a href="/novidades" onClick={closeMenu}>Novidades</a></li>
-                        <li><a href="/vestidos" onClick={closeMenu}>Vestidos</a></li>
-                        <li><a href="/blusas" onClick={closeMenu}>Blusas</a></li>
-                        <li><a href="/calcas" onClick={closeMenu}>Calças</a></li>
-                        <li><a href="/acessorios" onClick={closeMenu}>Acessórios</a></li>
-                    </ul>
+        <footer className="footer-elegance">
+            <div className="container">
+                {/* ==================== LOGO ==================== */}
+                <div className="footer-top">
+                    <a href="/" className="footer-logo">ELEGANCE</a>
                 </div>
 
-                {/* Overlay - fundo escuro quando menu está aberto */}
-                {/* Só aparece quando menuOpen é true */}
-                {/* Ao clicar, fecha o menu */}
-                {menuOpen && (
-                    <div className="navbar-overlay" onClick={closeMenu}></div>
-                )}
+                {/* ==================== NEWSLETTER ==================== */}
+                <div className="footer-newsletter">
+                    <h3>Receba Novidades</h3>
+                    <p>Cadastre-se e receba ofertas exclusivas e lançamentos em primeira mão</p>
+                    <form className="newsletter-form">
+                        <input
+                            type="email"
+                            placeholder="Digite seu e-mail"
+                            required
+                        />
+                        <button type="submit">Cadastrar</button>
+                    </form>
+                </div>
 
-                {/* Ícones do lado direito */}
-                <div className="navbar-icons">
-                    <button className="navbar-icon-btn cart-btn" aria-label="Sacola">
-                        <i className="bx bx-shopping-bag"></i>
-                    </button>
-                    <button className="navbar-icon-btn" aria-label="Minha conta">
-                        <i className="bx bx-user"></i>
-                    </button>
+                {/* ==================== COLUNAS DE LINKS ==================== */}
+                <div className="footer-content">
+                    {/* Coluna 1: Institucional */}
+                    <div className="footer-column">
+                        <h4>Institucional</h4>
+                        <ul>
+                            <li><a href="/sobre">Sobre Nós</a></li>
+                            <li><a href="/lojas">Nossas Lojas</a></li>
+                            <li><a href="/trabalhe-conosco">Trabalhe Conosco</a></li>
+                            <li><a href="/sustentabilidade">Sustentabilidade</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Coluna 2: Ajuda */}
+                    <div className="footer-column">
+                        <h4>Ajuda</h4>
+                        <ul>
+                            <li><a href="/central-ajuda">Central de Ajuda</a></li>
+                            <li><a href="/como-comprar">Como Comprar</a></li>
+                            <li><a href="/trocas">Trocas e Devoluções</a></li>
+                            <li><a href="/pagamento">Formas de Pagamento</a></li>
+                            <li><a href="/entrega">Prazo de Entrega</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Coluna 3: Categorias */}
+                    <div className="footer-column">
+                        <h4>Categorias</h4>
+                        <ul>
+                            <li><a href="/novidades">Novidades</a></li>
+                            <li><a href="/vestidos">Vestidos</a></li>
+                            <li><a href="/blusas">Blusas</a></li>
+                            <li><a href="/calcas">Calças</a></li>
+                            <li><a href="/acessorios">Acessórios</a></li>
+                            <li><a href="/outlet">Outlet</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Coluna 4: Contato */}
+                    <div className="footer-column">
+                        <h4>Contato</h4>
+                        
+                        <div className="footer-contact-item">
+                            <i className="bx bx-phone"></i>
+                            <span>(85) 98410-0173</span>
+                        </div>
+                        
+                        <div className="footer-contact-item">
+                            <i className="bx bx-envelope"></i>
+                            <span>contato@elegance.com.br</span>
+                        </div>
+                        
+                        <div className="footer-contact-item">
+                            <i className="bx bx-map"></i>
+                            <span>Av. Washinton Soares, 1234 - Fortaleza/CE</span>
+                        </div>
+                        
+                        <div className="footer-contact-item">
+                            <i className="bx bx-time"></i>
+                            <span>Seg a Sex: 9h às 18h</span>
+                        </div>
+
+                        {/* Redes Sociais */}
+                        <div className="footer-social">
+                            <a 
+                                href="https://instagram.com" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                aria-label="Instagram"
+                            >
+                                <i className="bx bxl-instagram"></i>
+                            </a>
+                            <a 
+                                href="https://facebook.com" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                aria-label="Facebook"
+                            >
+                                <i className="bx bxl-facebook"></i>
+                            </a>
+                            <a 
+                                href="https://youtube.com" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                aria-label="YouTube"
+                            >
+                                <i className="bx bxl-youtube"></i>
+                            </a>
+                            <a 
+                                href="https://wa.me/5585984100173" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                aria-label="WhatsApp"
+                            >
+                                <i className="bx bxl-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ==================== COPYRIGHT ==================== */}
+                <div className="footer-bottom">
+                    <div className="footer-bottom-content">
+                        <p>&copy; 2026 Elegance. Todos os direitos reservados.</p>
+                        <div className="footer-payments">
+                            <i className="bx bxl-visa"></i>
+                            <i className="bx bxl-mastercard"></i>
+                            <i className="bx bxs-credit-card"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </footer>
     );
 }
 ```
@@ -150,8 +180,9 @@ export default function Navbar() {
 Substitua o conteúdo do arquivo src/App.jsx:
 
 ```jsx
-// Importamos o componente Navbar
+// Importamos os componentes
 import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 
 function App() {
     return (
@@ -160,11 +191,19 @@ function App() {
             <Navbar />
             
             {/* Conteúdo temporário */}
-            <main style={{ padding: "100px 20px" }}>
-                <h1>Elegance Shop</h1>
-                <p>Em construção...</p>
-                <p>Teste o menu mobile redimensionando a janela!</p>
+            <main className="main-elegance">
+                <div className="container" style={{ padding: "60px 20px" }}>
+                    <h1>Elegance Shop</h1>
+                    <p>Em construção...</p>
+                    <p>Role para baixo para ver o Footer!</p>
+                    
+                    {/* Espaço para simular conteúdo */}
+                    <div style={{ height: "50vh" }}></div>
+                </div>
             </main>
+            
+            {/* Footer no rodapé */}
+            <Footer />
         </div>
     );
 }
@@ -174,16 +213,19 @@ export default App;
 
 ### 🎯 Exercícios para Fixação
 
-  1. Adicione um console.log: Dentro do toggleMenu, adicione console.log("Menu:", !menuOpen) e observe o console do navegador ao clicar.
+  1. Personalize o Footer: Troque o telefone e email para dados fictícios seus.
 
-  2. Novo estado: Crie um estado para controlar se o ícone do usuário foi clicado. Exiba um alert quando clicar.
+  2. Adicione uma rede social: Inclua o Pinterest ou TikTok na lista de redes sociais.
 
-  3. Contador de cliques: Crie um estado que conta quantas vezes o menu foi aberto.
+  3. Explore o BoxIcons: Acesse https://boxicons.com/ e troque alguns ícones por outros que você preferir.
+
+  4. Adicione um link: Na coluna "Institucional", adicione um link para "Política de Privacidade".
+
 
 ### Enviar para o GitHub
 
 ```
 git add .
-git commit -m "Etapa 2: Navbar com useState e useEffect"
-git push origin etapa-2-navbar-useState-useEffect
+git commit -m "Etapa 3: Footer visual completo"
+git push origin etapa-3-footer
 ```
