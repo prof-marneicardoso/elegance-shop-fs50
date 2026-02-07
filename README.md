@@ -8,322 +8,349 @@ Um projeto prático e progressivo para aprender React do zero ao deploy, constru
 
 ---
 
-## ETAPA 4 - Layout (children + Composição)
+## ETAPA 5 - Cards e API (fetch + useEffect + map)
 
 🎯 Objetivos desta etapa
 
-- Entender o conceito de children no React
-- Aprender o padrão de composição de componentes
-- Criar um componente Layout reutilizável
-- Estruturar as sections da página inicial
+- Entender como buscar dados de uma API externa
+- Usar useEffect para carregar dados ao iniciar
+- Usar map() para renderizar listas
+- Criar o componente ProductCard com props
+- Criar o componente ProductCarousel
+- Tratar estados de loading e erro
 
 ---
 
-### O que é Children?
+### O que é uma API?
 
-Imagine uma caixa de presente. A caixa é sempre a mesma, mas o presente dentro pode ser qualquer coisa: um livro, um brinquedo, uma roupa.
+API (Application Programming Interface) é uma forma de dois sistemas conversarem. Pense assim:
 
-No React, children funciona assim. É uma prop especial que representa "o que está dentro" do componente.
+  - Você (garçom) vai até a cozinha (API) e faz um pedido
+  - A cozinha prepara e devolve o prato (dados)
+  - Você entrega ao cliente (exibe na tela)
+
+No nosso caso:
+
+  - O React faz uma requisição para a MockAPI
+  - A MockAPI retorna os produtos em formato JSON
+  - O React exibe os produtos na tela
+
+JSON (JavaScript Object Notation) é o formato mais comum para troca de dados:
+
+```json
+[
+    {
+        "id": 1,
+        "name": "Vestido Floral",
+        "price": 189.90,
+        "image": "https://..."
+    },
+    {
+        "id": 2,
+        "name": "Blusa de Seda",
+        "price": 129.90,
+        "image": "https://..."
+    }
+]
+```
+
+### Fetch API
+
+O fetch é uma função nativa do JavaScript para fazer requisições HTTP.
+
+Sintaxe básica:
+
+```js
+fetch("https://api.exemplo.com/dados")
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error("Erro:", error);
+    });
+```
+
+## Criando os Componentes
+
+### Criar a branch da Etapa 5
+
+```
+git switch -c etapa-5-cards-api-useEffect-map
+```
+
+### Passo 1: Criar o ProductCard
+
+Crie o arquivo src/components/shop/ProductCard.jsx:
 
 ```jsx
-<Caixa>
-    <Presente />
-</Caixa>
-```
+// Importamos a função de formatação de moeda
+import { formatCurrency } from "../../utils/format";
 
-O componente Caixa recebe Presente como children. A Caixa não precisa saber o que é o Presente - ela só precisa renderizá-lo no lugar certo.
-
-Código do componente Caixa:
-
-```jsx
-function Caixa({ children }) {
-    return <div className="caixa-bonita">{children}</div>;
-}
-```
-
-Usando o componente:
-
-```jsx
-<Caixa>
-    <p>Qualquer coisa aqui dentro!</p>
-    <button>Até botões!</button>
-</Caixa>
-```
-
-## Criando o Footer
-
-### Criar a branch da Etapa 4
-
-```
-git switch -c etapa-4-layout-children-sections
-```
-
-### Passo 1: Criar o arquivo Layout.jsx
-
-Crie o arquivo src/components/layout/Layout.jsx:
-
-```jsx
-// Importamos os componentes que fazem parte do Layout
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-
-// Componente Layout
-// Recebe "children" como prop - tudo que estiver entre <Layout> e </Layout>
-// Esse padrão é chamado de COMPOSIÇÃO
-export default function Layout({ children }) {
-    return (
-        <div className="layout-elegance">
-            {/* Navbar sempre aparece no topo */}
-            <Navbar />
-
-            {/* 
-                O children é o conteúdo específico de cada página
-                Pode ser a Home, a página de Produtos, o Carrinho, etc.
-                O Layout não precisa saber o que é - só renderiza!
-            */}
-            <main className="main-elegance">{children}</main>
-
-            {/* Footer sempre aparece no rodapé */}
-            <Footer />
-        </div>
-    );
-}
-```
-
-### Passo 2: Atualizar o App.jsx
-
-Substitua o conteúdo do arquivo src/App.jsx:
-
-```jsx
-// Importamos os componentes
-import Navbar from "./components/layout/Navbar";
-import Footer from "./components/layout/Footer";
-
-function App() {
-    return (
-        <div>
-            {/* Navbar no topo */}
-            <Navbar />
-
-            {/* Conteúdo temporário */}
-            <main className="main-elegance">
-                <div className="container" style={{ padding: "60px 20px" }}>
-                    <h1>Elegance Shop</h1>
-                    <p>Em construção...</p>
-                    <p>Role para baixo para ver o Footer!</p>
-
-                    {/* Espaço para simular conteúdo */}
-                    <div style={{ height: "50vh" }}></div>
-                </div>
-            </main>
-
-            {/* Footer no rodapé */}
-            <Footer />
-        </div>
-    );
-}
-
-export default App;
-```
-
-### Passo 2: Criar o componente HeroBanner
-
-Agora vamos criar as sections da página inicial. Começando pelo banner principal.
-
-Crie o arquivo src/components/home/HeroBanner.jsx:
-
-```jsx
-// Importamos os hooks necessários
-import { useState, useEffect, useCallback } from "react";
-
-// Componente HeroBanner
-// Um carrossel de imagens para o topo da página
+// Componente ProductCard
+// Exibe um card de produto com imagem, nome, preço e tags
 // Props:
-//   - slides: array com os dados de cada slide
-//   - autoplayInterval: tempo entre trocas automáticas (em ms)
-export default function HeroBanner({ slides = [], autoplayInterval = 5000 }) {
-    // ========== ESTADO ==========
-    // Qual slide está ativo (começa no primeiro: índice 0)
-    const [currentSlide, setCurrentSlide] = useState(0);
+//   - product: objeto com os dados do produto
+//   - onOpenModal: função chamada ao clicar no card (opcional, para próxima etapa)
+export default function ProductCard({ product, onOpenModal }) {
+    // Função chamada ao clicar no card
+    const handleClick = () => {
+        // Se recebeu a função onOpenModal, chama ela
+        if (onOpenModal) {
+            onOpenModal(product);
+        }
+    };
 
-    // Se está no meio de uma animação (evita cliques rápidos)
-    const [isAnimating, setIsAnimating] = useState(false);
-
-    // ========== SLIDES PADRÃO ==========
-    // Se não receber slides via props, usa esses
-    const defaultSlides = [
-        {
-            image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&h=900&fit=crop",
-            title: "Nova Coleção Verão",
-            subtitle: "Descubra as tendências da estação com até 40% OFF",
-            buttonText: "Comprar Agora",
-        },
-        {
-            image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&h=900&fit=crop",
-            title: "Elegância em Cada Detalhe",
-            subtitle: "Peças exclusivas para mulheres que fazem a diferença",
-            buttonText: "Ver Coleção",
-        },
-        {
-            image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&h=900&fit=crop",
-            title: "Estilo Atemporal",
-            subtitle: "Clássicos que nunca saem de moda",
-            buttonText: "Explorar",
-        },
-    ];
-
-    // Usa os slides recebidos ou os padrão
-    const activeSlides = slides.length > 0 ? slides : defaultSlides;
-
-    // ========== FUNÇÕES ==========
-    // useCallback memoriza a função para evitar recriações desnecessárias
-    // Isso é importante quando a função é usada em useEffect
-
-    // Ir para um slide específico
-    const goToSlide = useCallback(
-        (index) => {
-            // Se está animando, ignora o clique
-            if (isAnimating) return;
-
-            setIsAnimating(true);
-            setCurrentSlide(index);
-
-            // Libera para nova animação após 500ms
-            setTimeout(() => setIsAnimating(false), 500);
-        },
-        [isAnimating],
-    );
-
-    // Ir para o próximo slide
-    const goToNext = useCallback(() => {
-        // Se está no último, volta para o primeiro
-        const next = (currentSlide + 1) % activeSlides.length;
-        goToSlide(next);
-    }, [currentSlide, activeSlides.length, goToSlide]);
-
-    // Ir para o slide anterior
-    const goToPrev = useCallback(() => {
-        // Se está no primeiro, vai para o último
-        const prev =
-            (currentSlide - 1 + activeSlides.length) % activeSlides.length;
-        goToSlide(prev);
-    }, [currentSlide, activeSlides.length, goToSlide]);
-
-    // ========== EFEITO: AUTOPLAY ==========
-    // Troca de slide automaticamente a cada X segundos
-    useEffect(() => {
-        // Se só tem 1 slide, não precisa de autoplay
-        if (activeSlides.length <= 1) return;
-
-        // Cria um intervalo que executa goToNext
-        const interval = setInterval(() => {
-            goToNext();
-        }, autoplayInterval);
-
-        // Cleanup: limpa o intervalo quando o componente sai da tela
-        // ou quando as dependências mudam
-        return () => clearInterval(interval);
-    }, [activeSlides.length, autoplayInterval, goToNext]);
-
-    // ========== RENDERIZAÇÃO ==========
     return (
-        <section className="hero-banner">
-            {/* Container dos slides */}
-            <div className="hero-slides">
-                {activeSlides.map((slide, index) => (
-                    <div
-                        key={index}
-                        className={`hero-slide ${index === currentSlide ? "active" : ""}`}
+        <div className="product-card" onClick={handleClick}>
+            {/* Imagem do produto */}
+            <div className="product-card-image">
+                <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    loading="lazy"
+                />
+
+                {/* Tags: Novo e/ou Desconto */}
+                <div className="product-tags">
+                    {/* Só mostra a tag "Novo" se isNew for true */}
+                    {product.isNew && (
+                        <span className="tag tag-new">Novo</span>
+                    )}
+                    
+                    {/* Só mostra a tag de desconto se discount existir */}
+                    {product.discount && (
+                        <span className="tag tag-discount">-{product.discount}%</span>
+                    )}
+                </div>
+
+                {/* Overlay com botões de ação (aparecem no hover) */}
+                <div className="product-card-overlay">
+                    <button 
+                        className="product-action-btn" 
+                        aria-label="Adicionar à sacola"
+                        onClick={(e) => {
+                            // Impede que o clique propague para o card
+                            e.stopPropagation();
+                            // Funcionalidade será implementada na etapa do carrinho
+                            console.log("Adicionar ao carrinho:", product.name);
+                        }}
                     >
-                        {/* Imagem de fundo */}
-                        <img
-                            src={slide.image}
-                            alt={slide.title}
-                            className="hero-slide-image"
-                        />
-
-                        {/* Overlay escuro para melhorar leitura do texto */}
-                        <div className="hero-slide-overlay"></div>
-
-                        {/* Conteúdo do slide */}
-                        <div className="hero-slide-content">
-                            <h1>{slide.title}</h1>
-                            <p>{slide.subtitle}</p>
-                            <button className="btn btn-white">
-                                {slide.buttonText}
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                        <i className="bx bx-shopping-bag"></i>
+                    </button>
+                    <button 
+                        className="product-action-btn" 
+                        aria-label="Favoritar"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <i className="bx bx-heart"></i>
+                    </button>
+                    <button 
+                        className="product-action-btn" 
+                        aria-label="Visualização rápida"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <i className="bx bx-show"></i>
+                    </button>
+                </div>
             </div>
 
-            {/* Navegação (só aparece se tiver mais de 1 slide) */}
-            {activeSlides.length > 1 && (
-                <>
-                    {/* Setas de navegação */}
-                    <button
-                        className="hero-nav prev"
-                        onClick={goToPrev}
-                        aria-label="Anterior"
-                    >
-                        <i className="bx bx-chevron-left"></i>
-                    </button>
-                    <button
-                        className="hero-nav next"
-                        onClick={goToNext}
-                        aria-label="Próximo"
-                    >
-                        <i className="bx bx-chevron-right"></i>
-                    </button>
+            {/* Informações do produto */}
+            <div className="product-card-info">
+                {/* Categoria/Tag do produto */}
+                <span className="product-tag">{product.tag}</span>
+                
+                {/* Nome do produto */}
+                <h3 className="product-name">{product.name}</h3>
+                
+                {/* Preços */}
+                <div className="product-price">
+                    {/* Só mostra preço antigo se existir */}
+                    {product.oldPrice && (
+                        <span className="price-old">
+                            {formatCurrency(product.oldPrice)}
+                        </span>
+                    )}
+                    
+                    {/* Preço atual */}
+                    <span className="price-current">
+                        {formatCurrency(product.price)}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+```
 
-                    {/* Indicadores (bolinhas) */}
-                    <div className="hero-indicators">
-                        {activeSlides.map((_, index) => (
-                            <button
-                                key={index}
-                                className={`hero-indicator ${index === currentSlide ? "active" : ""}`}
-                                onClick={() => goToSlide(index)}
-                                aria-label={`Slide ${index + 1}`}
+### Passo 2: Criar o ProductCarousel
+
+Crie o arquivo src/components/home/ProductCarousel.jsx:
+
+```jsx
+// Importamos useState e o componente ProductCard
+import { useState } from "react";
+import ProductCard from "../shop/ProductCard";
+
+// Componente ProductCarousel
+// Exibe uma lista de produtos em formato de carrossel horizontal
+// Props:
+//   - products: array de produtos a exibir
+//   - title: título da seção
+//   - subtitle: subtítulo da seção
+//   - onOpenModal: função para abrir modal de produto
+export default function ProductCarousel({ products = [], title, subtitle, onOpenModal }) {
+    // Índice do primeiro produto visível
+    const [startIndex, setStartIndex] = useState(0);
+    
+    // Quantos produtos mostrar por vez
+    const itemsPerPage = 4;
+
+    // Navegar para a esquerda (produtos anteriores)
+    const handlePrev = () => {
+        setStartIndex((prev) => {
+            // Se está no início, vai para o final
+            if (prev === 0) {
+                return Math.max(0, products.length - itemsPerPage);
+            }
+            // Senão, volta 1 posição
+            return prev - 1;
+        });
+    };
+
+    // Navegar para a direita (próximos produtos)
+    const handleNext = () => {
+        setStartIndex((prev) => {
+            // Se está no final, volta ao início
+            if (prev >= products.length - itemsPerPage) {
+                return 0;
+            }
+            // Senão, avança 1 posição
+            return prev + 1;
+        });
+    };
+
+    // Pega apenas os produtos que devem aparecer na tela
+    // slice(início, fim) retorna uma parte do array
+    const visibleProducts = products.slice(startIndex, startIndex + itemsPerPage);
+
+    return (
+        <section className="section">
+            <div className="container">
+                {/* Cabeçalho da seção (só aparece se tiver título ou subtítulo) */}
+                {(title || subtitle) && (
+                    <div className="section-header">
+                        {title && <h2 className="section-title">{title}</h2>}
+                        {subtitle && <p className="section-subtitle">{subtitle}</p>}
+                    </div>
+                )}
+
+                {/* Carrossel de produtos */}
+                <div className="product-carousel">
+                    {/* Botão anterior (só aparece se tiver mais produtos que o visível) */}
+                    {products.length > itemsPerPage && (
+                        <button 
+                            className="carousel-nav prev" 
+                            onClick={handlePrev} 
+                            aria-label="Anterior"
+                        >
+                            <i className="bx bx-chevron-left"></i>
+                        </button>
+                    )}
+
+                    {/* Container dos cards */}
+                    <div className="product-carousel-container">
+                        {/* 
+                            Usamos map() para transformar cada produto em um ProductCard
+                            key={product.id} é obrigatório para o React identificar cada item
+                        */}
+                        {visibleProducts.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                onOpenModal={onOpenModal}
                             />
                         ))}
                     </div>
-                </>
-            )}
+
+                    {/* Botão próximo */}
+                    {products.length > itemsPerPage && (
+                        <button 
+                            className="carousel-nav next" 
+                            onClick={handleNext} 
+                            aria-label="Próximo"
+                        >
+                            <i className="bx bx-chevron-right"></i>
+                        </button>
+                    )}
+                </div>
+            </div>
         </section>
     );
 }
 ```
 
-### Passo 3: Criar o componente PromoBanner
+### Passo 3: Atualizar o main.jsx
 
-Crie o arquivo src/components/home/PromoBanner.jsx:
+Agora vamos buscar os dados da API no ponto de entrada da aplicação.
+
+Substitua o conteúdo do arquivo src/main.jsx:
 
 ```jsx
-// Componente PromoBanner
-// Um banner promocional simples com imagem e texto
-// Props:
-//   - image: URL da imagem de fundo
-//   - title: título do banner
-//   - subtitle: texto secundário
-//   - buttonText: texto do botão
-export default function PromoBanner({ image, title, subtitle, buttonText }) {
-    return (
-        <section
-            className="promo-banner"
-            style={{ backgroundImage: `url(${image})` }}
-        >
-            {/* Overlay para escurecer a imagem */}
-            <div className="promo-banner-overlay"></div>
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./style.css";
 
-            {/* Conteúdo */}
-            <div className="promo-banner-content">
-                <h2>{title}</h2>
-                <p>{subtitle}</p>
-                <button className="btn btn-white">{buttonText}</button>
+// URL da MockAPI onde os produtos estão cadastrados
+// Esta é a mesma API que vocês usaram com Thunder Client / Postman
+const API_URL = "https://696b7b27624d7ddccaa15948.mockapi.io/api/products";
+
+// Cria a raiz do React
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+// Primeiro, renderiza uma tela de loading
+root.render(
+    <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Carregando...</p>
+    </div>
+);
+
+// Busca os produtos da API
+fetch(API_URL)
+    .then((response) => {
+        // Verifica se a resposta foi bem sucedida
+        if (!response.ok) {
+            throw new Error("Erro ao buscar produtos");
+        }
+        // Converte para JSON
+        return response.json();
+    })
+    .then((products) => {
+        // Sucesso! Renderiza o App com os produtos
+        console.log("Produtos carregados:", products);
+        
+        root.render(
+            <React.StrictMode>
+                <App products={products} />
+            </React.StrictMode>
+        );
+    })
+    .catch((error) => {
+        // Erro! Mostra mensagem e botão para tentar novamente
+        console.error("Erro:", error);
+        
+        root.render(
+            <div className="error-screen">
+                <h2>Ops! Algo deu errado</h2>
+                <p>Não foi possível carregar os produtos.</p>
+                <button onClick={() => window.location.reload()}>
+                    Tentar novamente
+                </button>
             </div>
-        </section>
-    );
-}
+        );
+    });
 ```
 
 ### Passo 4: Atualizar o App.jsx
@@ -331,15 +358,15 @@ export default function PromoBanner({ image, title, subtitle, buttonText }) {
 Substitua o conteúdo do arquivo src/App.jsx:
 
 ```jsx
-// Importamos o Layout e os componentes da Home
+// Importamos os componentes
 import Layout from "./components/layout/Layout";
 import HeroBanner from "./components/home/HeroBanner";
+import ProductCarousel from "./components/home/ProductCarousel";
 import PromoBanner from "./components/home/PromoBanner";
 
-function App() {
-    // Dados dos slides do HeroBanner
-    // Poderíamos deixar o HeroBanner usar os slides padrão,
-    // mas passando via props temos mais controle
+// O App agora recebe products como prop (vem do main.jsx)
+function App({ products = [] }) {
+    // Dados dos slides do banner
     const heroSlides = [
         {
             image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&h=900&fit=crop",
@@ -362,26 +389,18 @@ function App() {
     ];
 
     return (
-        // Layout envolve todo o conteúdo usando CHILDREN
-        // Tudo entre <Layout> e </Layout> vira o children
         <Layout>
-            {/* HeroBanner - Carrossel principal */}
+            {/* Banner principal */}
             <HeroBanner slides={heroSlides} />
 
-            {/* Seção de produtos virá aqui na próxima etapa */}
-            <section className="section">
-                <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">Novidades</h2>
-                        <p className="section-subtitle">As últimas peças que acabaram de chegar</p>
-                    </div>
-                    <p style={{ textAlign: "center", color: "#666" }}>
-                        Os produtos serão carregados na próxima etapa...
-                    </p>
-                </div>
-            </section>
+            {/* Carrossel de Novidades - todos os produtos */}
+            <ProductCarousel
+                products={products}
+                title="Novidades"
+                subtitle="As últimas peças que acabaram de chegar"
+            />
 
-            {/* PromoBanner - Banner promocional */}
+            {/* Banner promocional */}
             <PromoBanner
                 image="https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&h=600&fit=crop"
                 title="Outlet com até 50% OFF"
@@ -389,18 +408,12 @@ function App() {
                 buttonText="Ver Ofertas"
             />
 
-            {/* Outra seção de produtos virá aqui */}
-            <section className="section">
-                <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">Mais Vendidos</h2>
-                        <p className="section-subtitle">Os queridinhos das nossas clientes</p>
-                    </div>
-                    <p style={{ textAlign: "center", color: "#666" }}>
-                        Os produtos serão carregados na próxima etapa...
-                    </p>
-                </div>
-            </section>
+            {/* Carrossel de Mais Vendidos - primeiros 8 produtos */}
+            <ProductCarousel
+                products={products.slice(0, 8)}
+                title="Mais Vendidos"
+                subtitle="Os queridinhos das nossas clientes"
+            />
         </Layout>
     );
 }
@@ -410,18 +423,19 @@ export default App;
 
 ### 🎯 Exercícios para Fixação
 
-1. Adicione um slide: Adicione um quarto slide ao array heroSlides com uma nova imagem do Unsplash.
+1. Adicione um console.log: No ProductCarousel, adicione console.log("Produtos recebidos:", products) para ver os dados no console.
 
-2. Altere o intervalo: Mude o autoplayInterval do HeroBanner para 3000 (3 segundos).
+2. Filtre produtos: Crie uma terceira seção mostrando apenas produtos com desconto (use filter antes do map).
 
-3. Crie outro PromoBanner: Adicione um segundo PromoBanner após a seção "Mais Vendidos" com uma promoção diferente.
+3. Altere itemsPerPage: Mude para 3 ou 5 e veja como o carrossel se comporta.
 
-4. Experimente o children: Crie um componente simples chamado Card que recebe children e renderiza dentro de uma div estilizada.
+4. Teste o erro: Mude a URL da API para algo errado e veja a tela de erro aparecer.
+
 
 ### Enviar para o GitHub
 
 ```
 git add .
-git commit -m "Etapa 4: Layout com children e sections"
-git push origin etapa-4-layout-children-sections
+git commit -m "Etapa 5: Cards de produtos com API"
+git push origin etapa-5-cards-api-useEffect-map
 ```
