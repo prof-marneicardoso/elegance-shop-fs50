@@ -16,6 +16,8 @@ Um projeto prático e progressivo para aprender React do zero ao deploy, constru
  - Divulgar seu projeto para recrutadores e colegas
  - Construir seu portfólio público
 
+---
+
 ### Por que Postar no LinkedIn?
 
 O LinkedIn é a maior rede profissional do mundo. Postar seus projetos lá traz várias vantagens:
