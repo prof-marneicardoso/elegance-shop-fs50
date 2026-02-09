@@ -10,8 +10,8 @@ Um projeto prático e progressivo para aprender React do zero ao deploy, constru
 
 ## 🔀 Use as Branchs
 
-Para acompanhar este tutotial completo, use as branchs como guia. Comece pela branch Etapa-1 e siga o passo a passo. Cada etapa tem suas instruções a serem seguidas, começando pela etapa 1 até a etapa 9.
+Para acompanhar este tutorial completo, use as branchs como guia. Comece pela branch **Etapa-1** e siga o passo a passo. Cada etapa tem suas instruções a serem seguidas, começando pela etapa 1 até a etapa 9.
 
 Bons estudos!
 
-Prof. Marnei Cardoso - BGTech Acedamy
+### Prof. Marnei Cardoso - BGTech Acedamy
