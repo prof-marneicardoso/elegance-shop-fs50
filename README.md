@@ -14,4 +14,4 @@ Para acompanhar este tutorial completo, use as branchs como guia. Comece pela br
 
 Bons estudos!
 
-### Prof. Marnei Cardoso - BGTech Acedamy
+### Prof. Marnei Cardoso - BGTech Academy
